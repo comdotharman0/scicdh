@@ -2,5 +2,8 @@
 name = "scicdh"
 version = "0.1.0"
 edition = "2024"
+description = "A zero-dependency scientific library for probability space modeling and multi-variable statistical analysis."
+license = "MIT"
+repository = "https://github.com/comdotharman0/scicdh"
 
 [dependencies]
