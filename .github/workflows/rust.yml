@@ -34,4 +34,4 @@ jobs:
       - name: Install Stable Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Publish to Crates.io
-        run: cargo publish --token ${{ secrets.CRATES_TOKEN }}
+        run: cargo publish --token ${{ secrets.CRATES_TOKEN }} --allow-dirty
