@@ -1,0 +1,1 @@
+Scan<Zip<std::slice::Iter<'_, f64>, std::slice::Iter<'_, f64>>, {integer}, {closure@src/main.rs:19:3: 19:8}>
