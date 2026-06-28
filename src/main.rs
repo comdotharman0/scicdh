@@ -43,7 +43,7 @@ let a = DataSet(vec![1.0,2.0,3.0,4.0]);
 let p= Probability::get_probability(8,3);
 let npr= Probability::n_p_r(4,2);
 let f5= Probability::factorial(5);
-let ncr = Probability::n_c_r(4,0);
+let ncr = Probability::n_c_r(4,2);
 let random_var = Probability::random_variable(
 &[1.0,2.0,3.0],|a|{
 a*2 as f64
