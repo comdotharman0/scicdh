@@ -4,27 +4,27 @@ use crate::probability::*;
 
 pub struct DataSet<T>(Vec<T>);
 impl DataSet<f64>{
-pub fn mean(&self)->f64{
+pub fn mean(&self)->CDHResult<f64>{
 let len = self.0.len() as f64;
-self.0.iter().sum::<f64>()/len
+Ok(self.0.iter().sum::<f64>()/len)
 
 }
-pub fn median(&self)->f64{
-0f64
+pub fn median(&self)->CDHResult<f64>{
+Ok(0f64)
 }
-pub fn mode(&self)->f64{
+pub fn mode(&self)->CDHResult<f64>{
 
-0f64
+Ok(0f64)
 }
-pub fn range(&self)->f64{
+pub fn range(&self)->CDHResult<f64>{
 /*self.0.iter().max().unwrap_or_else(|e|{
 format!("The error is {:#?}",e)})-self.0.iter().min().unwrap()
-*/ 0f64
+*/ Ok(0f64)
 }
 }
 
 fn main(){
-println!("Hello World {}",Probability::n_c_r(40,0));
+println!("Hello World {:#?}",Probability::factorial(100));
 
 }
 
