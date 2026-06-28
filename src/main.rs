@@ -1,129 +1,30 @@
 pub mod statistics;
 pub mod probability;
-use crate::probability::Probability;
-pub struct RandomVector<T>(Vec<Vec<T>>);
-pub struct ProbabilityVector<T>(Vec<Vec<T>>);
-pub struct JointProbability<T>(Vec<Vec<T>>);
+use crate::probability::*;
 
-pub struct RandomVariable(Vec<f64>,Vec<f64>);
-pub struct Matrix<T>(Vec<Vec<T>>);
-impl Matrix<isize>{
-pub fn get(&self,i:usize,j:usize)->isize{
-self.0[i][j]
-}
-pub fn set(&mut self,i:usize,j:usize,value:isize)
-->isize{
-self.0[i][j]= value;
-value
-}
-pub fn add_row(&mut self,row: Vec<isize>){
-self.0.push(row);
-}
-
-}
-impl RandomVariable{
+pub struct DataSet<T>(Vec<T>);
+impl DataSet<f64>{
 pub fn mean(&self)->f64{
-
-self.expectation_from_func(|a|{
-a
-})
-}
-
-pub fn variance(&self)->f64{
-let summat:f64 = self.0.iter().zip(self.1.iter()).
-fold(0.0,|mut acc,b|{
-acc+= b.0.powf(2.0)*b.1;
-
-acc
-});
-
-summat-self.mean().powf(2.0)
+let len = self.0.len() as f64;
+self.0.iter().sum::<f64>()/len
 
 }
+pub fn median(&self)->f64{
+0f64
+}
+pub fn mode(&self)->f64{
 
-pub fn expectation_from_func<H>(&self,h:H)->f64
-where H: Fn(f64)->f64
-{
-self.0.iter().zip(self.1.iter()).
-fold(0.0,|mut a,b|{
-a+=h(*b.0)*b.1;
-a
-})
+0f64
 }
-pub fn expectation_from_set(&self,hx: &Vec<f64>)->f64{
-self.1.iter().zip(hx.iter()).
-fold(0.0,|mut a, b|{
-a+= b.0*b.1;
-a
-})
+pub fn range(&self)->f64{
+self.0.iter().max().unwrap_or_else(|e|{
+format!("The error is {:#?}",e)})-self.0.iter().min().unwrap()
 }
-pub fn std_deviation(&self)->f64{
-self.variance().powf(0.5)
-}
-pub fn moment_generating_func(&self,t:f64)->f64{
-self.expectation_from_func(|a|{
-let e: f64 = 2.718;
-e.powf(t*a)
-})
-}
-pub fn characteristic_func(&self,t:f64)->f64{
-self.expectation_from_func(|a|{
-let e: f64 = 2.718;
-e.powf(t*a*(-1.0 as f64).powf(0.5))
-})
 }
 
-pub fn variance_operator<H>(&self,h:H)->f64
-where
-H:Clone+ Fn(f64)->f64
-{
-self.expectation_from_func(|a|{
-(h(a) - self.expectation_from_func(h.clone()))
-.powf(2.0)
-})
-
-}
-/*
-pub fn covariance(&self,other: RandomVariable)->f64{
-let ex1=self.expectation_from_func(
-|a|{
-
-}
-
-)
-
-}*/
-}
 fn main(){
-println!("Hello World");
-let x = vec![0.0,1.0,2.0,3.0];
-let px = vec![1,3,3,1].iter().
-map(|&a|{
+println!("Hello World {}",Probability::n_c_r(40,0));
 
-Probability::get_probability(8,a as usize)
-}).collect::<Vec<f64>>();
-println!("x= {:?} \n px= {:?}",x,px);
-let rv = RandomVariable(x,px);
-println!("Random Variable = {:#?}",
-rv.moment_generating_func(1.0));
-let npr= Probability::n_p_r(4,2);
-println!("n_p_r={npr}");
-let random_var = Probability::random_variable(
-&[1.0,2.0,3.0],|a|{
-a*2 as f64
-});
-println!("Random Variable = {:?}",random_var);
-let pd = Probability::distribution_function(
-&[0.1,0.2,0.3,0.4]);
-println!("Probability Distribution = {:#?}",pd);
-let mut a= [1.0,2.0,3.0,4.0];
-let mut b = [0.1,0.2,0.3,0.4];
-println!("a zip b = {:#?}",a.iter().zip(b.iter())
-.scan(
-1.0,|c,d|{
-*c = d.0*d.1;
-Some(*c)
-}).sum::<f64>());
 }
 
 
@@ -141,7 +42,7 @@ let a = DataSet(vec![1.0,2.0,3.0,4.0]);
 let p= Probability::get_probability(8,3);
 let npr= Probability::n_p_r(4,2);
 let f5= Probability::factorial(5);
-let ncr = Probability::n_c_r(4,2);
+let ncr = Probability::n_c_r(4,0);
 let random_var = Probability::random_variable(
 &[1.0,2.0,3.0],|a|{
 a*2 as f64
