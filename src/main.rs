@@ -19,7 +19,8 @@ pub fn mode(&self)->f64{
 pub fn range(&self)->f64{
 /*self.0.iter().max().unwrap_or_else(|e|{
 format!("The error is {:#?}",e)})-self.0.iter().min().unwrap()
-}*/ 0f64
+*/ 0f64
+}
 }
 
 fn main(){
