@@ -20,6 +20,9 @@ pub struct JointProbability<T>(pub Vec<Vec<T>>);
 
 
 impl RandomVariable{
+pub fn new(x:Vec<f64>,px:Vec<f64>)->Self{
+Self(x,px)
+}
 pub fn mean(&self)->CDHResult<f64>{
 self.expectation_from_func(|a|{
 a
@@ -48,7 +51,7 @@ a+=h(*b.0)*b.1;
 a
 }))
 }
-pub fn expectation_from_set(&self,hx: &Vec<f64>)
+pub fn expectation_from_set(&self,hx: &[f64])
 ->CDHResult<f64>{
 Ok(self.1.iter().zip(hx.iter()).
 fold(0.0,|mut a, b|{
@@ -61,28 +64,29 @@ Ok(self.variance()?.powf(0.5))
 }
 pub fn moment_generating_func(&self,t:f64)
 ->CDHResult<f64>{
-Ok(self.expectation_from_func(|a|{
-let e: f64 = 2.718;
+self.expectation_from_func(|a|{
+let e: f64 = std::f64::consts::E;
 e.powf(t*a)
-})?)
+})
 }
 pub fn characteristic_func(&self,t:f64)
 ->CDHResult<f64>{
-Ok(self.expectation_from_func(|a|{
-let e: f64 = 2.718;
-e.powf(t*a*(-1.0 as f64).powf(0.5))
-})?)
+self.expectation_from_func(|a|{
+let e: f64 = std::f64::consts::E;
+e.powf(t*a*(-1.0_f64).powf(0.5))
+})
 }
 
 pub fn variance_operator<H>(&self,h:H)
 ->CDHResult<f64>
 where
 H:Clone+ Fn(f64)->f64
-{Ok(
+{
 self.expectation_from_func(|a|{
-(h(a) - self.expectation_from_func(h.clone()).unwrap())
+(h(a) - self.expectation_from_func(h.clone())
+.unwrap())
 .powf(2.0)
-})?)
+})
 
 }
 
@@ -91,6 +95,10 @@ self.expectation_from_func(|a|{
 
 
 impl RandomVector<f64>{
+pub fn new(x:Vec<RandomVariable>,
+px:JointProbability<f64>)->Self{
+Self(x,px)
+}
 pub fn marginal_x2(&self,index:usize)
 ->CDHResult<f64>{
 Ok(self.1.0.iter().map(|a| a[index]).sum::<f64>())
@@ -248,9 +256,18 @@ a*(b as f64)
 
 }
 pub fn n_p_r(n:usize,r:usize)->CDHResult<f64>{
+match (n,r){
+(0,_) => Err("n cannot be 0".to_string()),
+(_a,0)=>Ok(1f64),
+(a,b) if a==b=>Self::factorial(a),
+(_,_)=>{
 Ok((0..r).fold(1f64,|a,b|{
 a*(n as f64-b as f64)
 }))
+}
+}
+
+
 }
 
 pub fn n_c_r(n:usize,r:usize)->CDHResult<f64>{
@@ -286,6 +303,11 @@ distri)
 pub struct Binomial{
 pub n:usize,pub x:Vec<usize>,pub p:f64}
 impl Binomial{
+pub fn new(n:usize,x:Vec<usize>,p:f64)->Self{
+Self{
+n,x,p
+}
+}
 pub fn get_probability_set(&self)
 ->CDHResult<Vec<f64>>{
 Ok(self.x.iter().map(|&i|{
@@ -306,6 +328,10 @@ Ok(self.mean()?*(1f64-self.p))
 pub struct Geometric{
 pub x:Vec<usize>,pub p:f64}
 impl Geometric{
+pub fn new(x:Vec<usize>, p:f64)->Self{
+Self{
+x,p}
+}
 pub fn get_probability_set(&self)
 ->CDHResult<Vec<f64>>{
 Ok(self.x.iter().map(|&i|{
@@ -324,6 +350,9 @@ Ok((1f64-self.p)/(self.p.powf(2f64)))
 pub struct Pascal{
 pub r:usize,pub x:Vec<usize>,pub p:f64}
 impl Pascal{
+pub fn new(r:usize,x:Vec<usize>,p:f64)->Self{
+Self{r,x,p}
+}
 pub fn get_probability_set(&self)
 ->CDHResult<Vec<f64>>{
 Ok(self.x.iter().map(|&i|{
@@ -342,8 +371,14 @@ Ok(self.r as f64/(self.p.powf(2f64)))
 }
 
 pub struct HyperGeometric{
-pub big_n:usize,pub big_t: usize,pub n:usize,pub x:usize}
+pub big_n:usize,pub big_t: usize,
+pub n:usize,pub x:usize}
 impl HyperGeometric{
+pub fn bew(big_n:usize,big_t: usize,
+n:usize,x:usize)->Self{
+Self{big_n,big_t,n,x}
+}
+
 pub fn get_probability(&self)->CDHResult<f64>{
 
 let big_t_x = Probability::n_c_r(self.big_t,

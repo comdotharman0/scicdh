@@ -4,6 +4,10 @@ use crate::probability::*;
 
 pub struct DataSet<T>(Vec<T>);
 impl DataSet<f64>{
+pub fn new(data:Vec<f64>)->Self{
+DataSet(data)
+
+}
 pub fn mean(&self)->CDHResult<f64>{
 let len = self.0.len() as f64;
 Ok(self.0.iter().sum::<f64>()/len)
@@ -21,11 +25,34 @@ pub fn range(&self)->CDHResult<f64>{
 format!("The error is {:#?}",e)})-self.0.iter().min().unwrap()
 */ Ok(0f64)
 }
+pub fn variance(&self)->CDHResult<f64>{
+let n = self.0.len() as f64;
+let mean = self.mean()?;
+Ok(self.0.iter().fold(0.0,|acc,&x|{
+acc+ (x-mean).powf(2f64)
+
+})/(n-1f64))
+}
+pub fn info(&self)->CDHResult<()>{
+let (mean,median,mode,range,variance)= (self.mean()?,
+self.median()?,self.mode()?,self.range()?,
+self.variance()?);
+println!("DataSet === {:#?}",self.0);
+println!("Mean === {:#?}",mean);
+println!("Median === {:#?}",median);
+println!("Mode === {:#?}",mode);
+println!("Range === {:#?}",range);
+println!("Variance === {:#?}",variance);
+Ok(())
+}
 }
 
-fn main(){
+fn main()->CDHResult<()>{
+let d = DataSet:: new((0..11).map(|i| i as f64).collect::<Vec<f64>>());
+let _ = d.info();
 println!("Hello World {:#?}",Probability::factorial(100));
-
+Probability::factorial(103)?;
+Ok(())
 }
 
 
