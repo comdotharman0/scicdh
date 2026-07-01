@@ -206,7 +206,6 @@ let d = DataSet:: new(vec![0.1,0.2,0.3,0.4,0.4,0.3,
 0.2,0.1,0.0,0.4]);
 let _ = d.info();
 println!("Hello World {:#?}",Probability::factorial(100));
-Probability::factorial(103)?;
 Ok(())
 }
 
@@ -222,7 +221,7 @@ use crate:: probability::*;
 #[test]
 fn mean_test(){
 let a = DataSet(vec![1.0,2.0,3.0,4.0]);
-let p= Probability::get_probability(8,3);
+let p= Probability::get_probability(8.0,3.0);
 let npr= Probability::n_p_r(4,2);
 let f5= Probability::factorial(5);
 let ncr = Probability::n_c_r(4,2);
@@ -231,11 +230,11 @@ let random_var = Probability::random_variable(
 a*2 as f64
 });
 println!("Random Variable = {:?}",random_var);
-assert_eq!(a.mean(),2.5);
-assert_eq!(p,0.375);
-assert_eq!(npr,12);
-assert_eq!(ncr,6);
-assert_eq!(f5,120);
+assert_eq!(a.mean(),2.5f64);
+assert_eq!(p,Ok(0.375f64));
+assert_eq!(npr,Ok(12f64));
+assert_eq!(ncr,Ok(6f64));
+assert_eq!(f5,Ok(120f64));
 }
 }
 
