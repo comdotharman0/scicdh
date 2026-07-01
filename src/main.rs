@@ -27,30 +27,38 @@ Ok((center_elem+next_elem)/2f64)
 }
 }
 }
-pub fn mode(&self)->CDHResult<f64>{
-let mut frequencies = HashMap::new();
-
-    // Count occurrences of each number
-    for num in &self.0 {
-        let bits = num.to_bits();
-        *frequencies.entry(bits).or_insert(0) += 1;
-    }
-
-    // 3. Find the bit pattern with the maximum frequency
-    Ok(frequencies
-        .into_iter()
-        .max_by_key(|&(_, count)| count)
-        .map(|(bits, _)| f64::from_bits(bits)).unwrap())
-
+pub fn mode(&self)->CDHResult<Option<f64>>{
+let mut frequencies: Vec<(f64,usize)> = vec![];
+let set = self.into_set()?;
+let mut max_count = 0;
+set.iter()
+.for_each(|&a|{
+let i = self.0.iter().filter(|&&b| b==a).count();
+if i>max_count{
+max_count = i;
+}
+frequencies.push((a,i));
+});
+let mut  desired = frequencies
+.iter().filter(|&a| a.1 == max_count);
+if  desired.clone().count()>1{
+Ok(None)
+}else{
+Ok(Some(desired.next().ok_or("")?.0))
+}
 }
 pub fn range(&self)->CDHResult<f64>{
 /*self.0.iter().max().unwrap_or_else(|e|{
 format!("The error is {:#?}",e)})-self.0.iter().min().unwrap()
-*/ Ok(0f64)
+*/ Ok(self.max()?-self.min()?)
 }
 pub fn has(&self,value:f64,other:Option<&[f64]>)
 ->CDHResult<bool>{
-Ok(self.0.iter().any(|&x| x==value))
+let set = match other{
+None=> &self.0,
+_ => &other.ok_or("")?.to_vec()
+};
+Ok(set.iter().filter(|&&v| v==value).count()>0)
 }
 
 pub fn sample_variation_x2(&self)->CDHResult<f64>{
@@ -132,7 +140,13 @@ Ok(self.sample_variation_xy(y)?/((self
 }
 
 pub fn into_set(&self)->CDHResult<Vec<f64>>{
-Ok(self.0.clone())
+let mut set: Vec<f64> = vec![];
+for &a in self.0.iter(){
+if !self.has(a,Some(&set))?{
+set.push(a);
+}
+}
+Ok(set)
 }
 pub fn population_variance(&self)->CDHResult<f64>{
 let n = self.0.len() as f64;
@@ -146,6 +160,26 @@ pub fn population_std_deviation(&self)
 ->CDHResult<f64>{
 Ok(self.population_variance()?.powf(0.5))
 }
+pub fn max(&self)->CDHResult<f64>{
+let mut max = self.0[0];
+self.0.iter().
+for_each(|&i| {
+if i>max{
+max = i;
+}
+});
+Ok(max)
+}
+pub fn min(&self)->CDHResult<f64>{
+let mut min = self.0[0];
+self.0.iter().
+for_each(|&i| {
+if i<min{
+min = i;
+}
+});
+Ok(min)
+}
 pub fn info(&self)->CDHResult<()>{
 let (mean,median,mode,range,variance)= (self.mean()?,
 self.median()?,self.mode()?,self.range()?,
@@ -158,12 +192,18 @@ println!("Range === {:#?}",range);
 println!("Variance === {:#?}",variance);
 println!("Skewness === {:#?}",self.skewness()?);
 println!("Kurtosis === {:#?}",self.kurtosis()?);
+println!("self has 3f64 == {:?}",self.has(3f64,None)?);
+println!("Set === {:?}",self.into_set()?);
+println!("Maximum === {:?}",self.max()?);
+println!("Minimum === {:?}",self.min()?);
 Ok(())
 }
 }
 
 fn main()->CDHResult<()>{
-let d = DataSet:: new((0..10).map(|i| i as f64).collect::<Vec<f64>>());
+let _ = check_probability()?;
+let d = DataSet:: new(vec![0.1,0.2,0.3,0.4,0.4,0.3,
+0.2,0.1,0.0,0.4]);
 let _ = d.info();
 println!("Hello World {:#?}",Probability::factorial(100));
 Probability::factorial(103)?;

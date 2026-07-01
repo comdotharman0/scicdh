@@ -4,7 +4,7 @@ pub type CDHResult<T> = Result<T,String>;
 #[derive(Debug)]
 pub struct Probability;
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct RandomVariable(pub Vec<f64>,
 pub Vec<f64>);
 
@@ -15,9 +15,53 @@ pub JointProbability<T>);
 #[derive(Debug)]
 pub struct ProbabilityVector<T>(pub Vec<Vec<T>>);
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub struct JointProbability<T>(pub Vec<Vec<T>>);
 
+pub fn check_probability()->CDHResult<()>{
+println!("+++++ probability.rs results +++++");
+let x = (0..10).map(|i| i as f64).collect::<Vec<f64>>();
+let px = x.iter().map(|_| 1f64/10f64)
+.collect::<Vec<f64>>();
+let rv = RandomVariable::new(x,px);
+println!("Random Variable Mean === {:?}"
+,rv.mean()?);
+println!("Random Variable Variance === {:?}"
+,rv.variance()?);
+println!("Random Variable Standard Deviation === {:?}"
+,rv.std_deviation()?);
+println!("Random Variable Moment Generating func(5) === {:?}"
+,rv.moment_generating_func(5f64)?);
+let jp: Vec<Vec<f64>> = (0..10).
+map(|_|{
+(0..10).map(|_| 1f64/200f64).collect()
+}).collect();
+let rvv = RandomVector:: new(vec![rv.clone(),
+rv.clone()],JointProbability::new(jp))?;
+println!("Random Vector Covariance === {:?}"
+,rvv.covariance()?);
+println!("Random Vector Correlation=== {:?}"
+,rvv.correlation()?);
+rvv.get_jointprobability()?.validate_probability();
+println!("\n\n\n\n");
+Ok(())
+
+}
+impl JointProbability<f64>{
+pub fn new(px: Vec<Vec<f64>>)->Self{
+Self(px)
+}
+
+pub fn validate_probability(&self){
+println!("Sum of all elements is == {:?}",
+self.0.iter().
+fold(0f64,|acc,px2|{
+acc+px2.iter().fold(0f64,|acc2,a|{
+acc2+a
+})
+}));
+}
+}
 
 impl RandomVariable{
 pub fn new(x:Vec<f64>,px:Vec<f64>)->Self{
@@ -31,10 +75,8 @@ a
 
 pub fn variance(&self)->CDHResult<f64>{
 let summat:f64 = self.0.iter().zip(self.1.iter()).
-fold(0.0,|mut acc,b|{
-acc+= b.0.powf(2.0)*b.1;
-
-acc
+fold(0.0,|acc,b|{
+acc+b.0.powf(2.0)*b.1
 });
 Ok(
 summat-self.mean()?.powf(2.0)
@@ -96,8 +138,30 @@ self.expectation_from_func(|a|{
 
 impl RandomVector<f64>{
 pub fn new(x:Vec<RandomVariable>,
-px:JointProbability<f64>)->Self{
-Self(x,px)
+px:JointProbability<f64>)->CDHResult<Self>{
+
+match x{
+a if a.len()<2 => Err("Vec.len() should be >= 2 in RandomCector::new".to_string()),
+a => {
+let len = a[0].0.len();
+for i in &a[1..]{
+if !i.0.len()==len{
+return Err("Random Variables should have same size".to_string());
+}
+}
+Ok(Self(a,px))
+}
+}
+}
+pub fn get_jointprobability(&self)
+->CDHResult<JointProbability<f64>>{
+let jp : Vec<Vec<f64>> = self.0[1].1.iter()
+.map(|&px2|{
+self.0[0].1.iter().
+map(|&px1| px2*px1).collect()
+}).collect();
+//println!("JP === {:#?}",jp);
+Ok(JointProbability::new(jp))
 }
 pub fn marginal_x2(&self,index:usize)
 ->CDHResult<f64>{
@@ -110,6 +174,7 @@ Ok(self.1.0[index].iter().sum::<f64>())
 pub fn conditional_x1(&self,
 index_x1:usize,
 index_x2:usize)->CDHResult<f64>{
+
 Ok(
 self.1.0[index_x2][index_x1]/self.0[1].1[index_x2]
 )
@@ -400,3 +465,4 @@ let n= self.n as f64;
 Ok(self.mean()?*(1f64 - (dd/nn))*((nn-n)/(nn-1f64)))
 }
 }
+
