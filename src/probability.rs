@@ -5,18 +5,19 @@ pub type CDHResult<T> = Result<T,String>;
 pub struct Probability;
 
 #[derive(Debug,Clone)]
-pub struct RandomVariable(pub Vec<f64>,
-pub Vec<f64>);
-
+pub struct RandomVariable{
+pub variable:Vec<f64>,
+pub probability: Vec<f64>
+}
 #[derive(Debug)]
-pub struct RandomVector<T>(pub Vec<RandomVariable>,
-pub JointProbability<T>);
-
-#[derive(Debug)]
-pub struct ProbabilityVector<T>(pub Vec<Vec<T>>);
+pub struct RandomVector<T>{
+pub variables: Vec<RandomVariable>,
+pub probability_matrix:JointProbability<T>}
 
 #[derive(Debug,PartialEq)]
-pub struct JointProbability<T>(pub Vec<Vec<T>>);
+pub struct JointProbability<T>{
+pub matrix:Vec<Vec<T>>
+}
 
 pub fn check_probability()->CDHResult<()>{
 println!("+++++ probability.rs results +++++");
@@ -49,12 +50,12 @@ Ok(())
 }
 impl JointProbability<f64>{
 pub fn new(px: Vec<Vec<f64>>)->Self{
-Self(px)
+Self{matrix:px}
 }
 
 pub fn validate_probability(&self){
 println!("Sum of all elements is == {:?}",
-self.0.iter().
+self.matrix.iter().
 fold(0f64,|acc,px2|{
 acc+px2.iter().fold(0f64,|acc2,a|{
 acc2+a
@@ -65,7 +66,7 @@ acc2+a
 
 impl RandomVariable{
 pub fn new(x:Vec<f64>,px:Vec<f64>)->Self{
-Self(x,px)
+Self{variable:x,probability:px}
 }
 pub fn mean(&self)->CDHResult<f64>{
 self.expectation_from_func(|a|{
@@ -74,7 +75,8 @@ a
 }
 
 pub fn variance(&self)->CDHResult<f64>{
-let summat:f64 = self.0.iter().zip(self.1.iter()).
+let summat:f64 = self.variable.iter().
+zip(self.probability.iter()).
 fold(0.0,|acc,b|{
 acc+b.0.powf(2.0)*b.1
 });
@@ -87,7 +89,7 @@ pub fn expectation_from_func<H>(&self,h:H)
 ->CDHResult<f64>
 where H: Fn(f64)->f64
 {Ok(
-self.0.iter().zip(self.1.iter()).
+self.variable.iter().zip(self.probability.iter()).
 fold(0.0,|mut a,b|{
 a+=h(*b.0)*b.1;
 a
@@ -95,7 +97,7 @@ a
 }
 pub fn expectation_from_set(&self,hx: &[f64])
 ->CDHResult<f64>{
-Ok(self.1.iter().zip(hx.iter()).
+Ok(self.probability.iter().zip(hx.iter()).
 fold(0.0,|mut a, b|{
 a+= b.0*b.1;
 a
@@ -143,21 +145,22 @@ px:JointProbability<f64>)->CDHResult<Self>{
 match x{
 a if a.len()<2 => Err("Vec.len() should be >= 2 in RandomCector::new".to_string()),
 a => {
-let len = a[0].0.len();
+let len = a[0].variable.len();
 for i in &a[1..]{
-if !i.0.len()==len{
+if !i.variable.len()==len{
 return Err("Random Variables should have same size".to_string());
 }
 }
-Ok(Self(a,px))
+Ok(Self{variables:a,probability_matrix:px})
 }
 }
 }
 pub fn get_jointprobability(&self)
 ->CDHResult<JointProbability<f64>>{
-let jp : Vec<Vec<f64>> = self.0[1].1.iter()
+let jp : Vec<Vec<f64>> = self.variables[1]
+.probability.iter()
 .map(|&px2|{
-self.0[0].1.iter().
+self.variables[0].probability.iter().
 map(|&px1| px2*px1).collect()
 }).collect();
 //println!("JP === {:#?}",jp);
@@ -165,32 +168,38 @@ Ok(JointProbability::new(jp))
 }
 pub fn marginal_x2(&self,index:usize)
 ->CDHResult<f64>{
-Ok(self.1.0.iter().map(|a| a[index]).sum::<f64>())
+Ok(self.probability_matrix.matrix
+.iter().map(|a| a[index]).sum::<f64>())
 }
 pub fn marginal_x1(&self,index:usize)
 ->CDHResult<f64>{
-Ok(self.1.0[index].iter().sum::<f64>())
+Ok(self.probability_matrix.matrix[index].iter().sum::<f64>())
 }
 pub fn conditional_x1(&self,
 index_x1:usize,
 index_x2:usize)->CDHResult<f64>{
 
 Ok(
-self.1.0[index_x2][index_x1]/self.0[1].1[index_x2]
+self.probability_matrix
+.matrix[index_x2][index_x1]/self
+.variables[1].probability[index_x2]
 )
 }
 pub fn conditional_x2(&self,
 index_x1:usize,
 index_x2:usize)->CDHResult<f64>{
 Ok(
-self.1.0[index_x2][index_x1]/self.0[1].1[index_x1]
+self.probability_matrix.
+matrix[index_x2][index_x1]/self.
+variables[0].probability[index_x1]
 )}
 pub fn conditional_expectation_x1<H>(&self,
  index_x2: usize, h: H) -> CDHResult<f64>
     where
         H: Fn(f64) -> f64,
     {
-        let x1_outcomes = &self.0[0].0; 
+        let x1_outcomes = &self.variables[0]
+.variable; 
 // Access outcomes of X1
         let mut expected_value = 0.0;
 
@@ -214,7 +223,8 @@ index_x1: usize, h: H) -> CDHResult<f64>
     where
         H: Fn(f64) -> f64,
     {
-        let x2_outcomes = &self.0[1].0; 
+        let x2_outcomes = &self.variables[1]
+.variable; 
 // Access outcomes of X2
         let mut expected_value = 0.0;
 
@@ -235,20 +245,21 @@ pub fn joint_expectation<F>(&self, g: F)
     where
         F: Fn(f64, f64) -> f64,
     {
-        let x = &self.0[0];
-        let y = &self.0[1];
-        let joint_matrix = &self.1.0;
+        let x = &self.variables[0];
+        let y = &self.variables[1];
+        let joint_matrix = &self.probability_matrix.
+matrix;
 
         let mut expected_value = 0.0;
 
-        for i in 0..x.0.len() {
-            for j in 0..y.0.len() {
+        for i in 0..x.variable.len() {
+            for j in 0..y.variable.len() {
                 let p_joint = joint_matrix[i][j];
                 
                 if p_joint > 0.0 {
                     // Accumulate: g(x, y) * P(x, y)
                     expected_value += g(
-x.0[i], y.0[j]) * p_joint;
+x.variable[i], y.variable[j]) * p_joint;
                 }
             }
         }
