@@ -1,4 +1,4 @@
-# CDH Statistics & Probability Library
+# SciCDH Statistics & Probability Library
 
 A pure Rust library for descriptive statistics and 
 discrete probability theory. Built with **zero external 
