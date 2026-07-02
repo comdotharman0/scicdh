@@ -1,0 +1,18 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "scicdh",
+  "description": "A high-performance, zero-dependency statistical and discrete probability calculation engine implemented in Rust.",
+  "programmingLanguage": "Rust",
+  "runtimePlatform": "Cargo",
+  "license": "https://spdx.org/licenses/MIT.html",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Harman",
+      "familyName": "Singh",
+      "orcid": "https://orcid.org/0009-0004-5218-9471"
+    }
+  ]
+}
+
