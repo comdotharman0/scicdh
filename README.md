@@ -6,9 +6,7 @@ dependencies** using only Rust's standard library.
 
 ## Author
 Harman Singh  
-ORCID: [your ORCID here]  
-DOI: [your figshare DOI here]
-
+ORCID: [0009-0004-5218-9471](https://orcid.org/0009-0004-5218-9471)
 ## Features
 
 ### Statistics (`statistics.rs`)
@@ -110,4 +108,6 @@ from inline `///` doc comments on every public function.
   are planned
 
 ## License
-MIT
+
+This project is licensed under the MIT License. See the full [LICENSE](https://github.com/comdotharman0/scicdh/blob/main/LICENSE) file for copyright details and permissions.
+
