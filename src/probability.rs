@@ -60,7 +60,10 @@ println!("Random Variable Variance === {:?}"
 ,rv.variance()?);
 println!("Random Variable Standard Deviation === {:?}"
 ,rv.std_deviation()?);
+println!("Random Variable variance operator  === {:?}"
+,rv.variance_operator(&|a| a)?);
 println!("Random Variable Moment Generating func(5) === {:?}"
+
 ,rv.moment_generating_func(5f64)?);
 let jp: Vec<Vec<f64>> = (0..10).
 map(|_|{
@@ -122,7 +125,7 @@ Self{variable:x,probability:px}
     /// assert_eq!(rv.mean().unwrap(), 1.5);
     /// ```
 pub fn mean(&self)->CDHResult<f64>{
-self.expectation_from_func(|a|{
+self.expectation_from_func(&|a|{
 a
 })
 }
@@ -144,7 +147,7 @@ summat-self.mean()?.powf(2.0)
    /// Transforms elements via an arbitrary closure parameter and sums the targeted transformation grid weights.
     ///
     /// $$E[h(X)] = \sum h(x_i) p(x_i)$$
-pub fn expectation_from_func<H>(&self,h:H)
+pub fn expectation_from_func<H>(&self,h:&H)
 ->CDHResult<f64>
 where H: Fn(f64)->f64
 {Ok(
@@ -175,7 +178,7 @@ Ok(self.variance()?.powf(0.5))
     /// $$M_X(t) = E[e^{tX}]$$
 pub fn moment_generating_func(&self,t:f64)
 ->CDHResult<f64>{
-self.expectation_from_func(|a|{
+self.expectation_from_func(&|a|{
 let e: f64 = std::f64::consts::E;
 e.powf(t*a)
 })
@@ -209,8 +212,8 @@ pub fn variance_operator<H>(&self,h:H)
 where
 H:Clone+ Fn(f64)->f64
 {
-self.expectation_from_func(|a|{
-(h(a) - self.expectation_from_func(h.clone())
+self.expectation_from_func(&|a|{
+(h(a) - self.expectation_from_func(&h)
 .unwrap())
 .powf(2.0)
 })

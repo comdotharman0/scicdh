@@ -1,10 +1,13 @@
 pub mod statistics;
 pub mod probability;
 pub mod series;
+pub mod models;
+use crate::models::regressions::*;
 use crate::probability::*;
 use crate::series::*;
  use crate::statistics::*;
 fn main()->CDHResult<()>{
+check_regressions()?;
 let _ = check_probability()?;
 let _ = check_series()?;
 let d = DataSet:: new(vec![0.1,0.2,0.3,0.4,0.4,0.3,

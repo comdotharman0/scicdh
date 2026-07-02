@@ -107,6 +107,14 @@ from inline `///` doc comments on every public function.
   continuous distributions (Normal, Poisson, etc.)
   are planned
 
+## References
+
+The mathematical specifications, distributions, and foundational statistical algorithms implemented in this library are sourced from the following academic literature:
+
+* Axler, S. (2020). *Measure, Integration & Real Analysis* (Graduate Texts in Mathematics, Vol. 280). Springer.
+* Hines, W. W., Montgomery, D. C., Goldsman, D. M., & Borror, C. M. (2003). *Probability and Statistics in Engineering* (4th ed.). John Wiley & Sons.
+
+
 ## License
 
 This project is licensed under the MIT License. See the full [LICENSE](https://github.com/comdotharman0/scicdh/blob/main/LICENSE) file for copyright details and permissions.
