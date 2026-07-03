@@ -118,7 +118,7 @@ mod tests {
     fn test_rv_expectation_from_func() {
         // E[X^2] = 0.2*(0+1+4+9+16) = 6.0
         let result = uniform_rv()
-            .expectation_from_func(|x| x.powf(2.0))
+            .expectation_from_func(&|x:f64| x.powf(2.0))
             .unwrap();
         assert!(approx_eq(result, 6.0));
     }
