@@ -1,17 +1,10 @@
-pub mod statistics;
-pub mod probability;
-pub mod series;
-pub mod models;
-use crate::models::regressions::*;
-use crate::probability::*;
-use crate::series::*;
- use crate::statistics::*;
+use scicdh::statistics::*;
+use scicdh::probability::*;
 fn main()->CDHResult<()>{
-check_regressions()?;
-let _ = check_probability()?;
-let _ = check_series()?;
-let d = DataSet:: new(vec![0.1,0.2,0.3,0.4,0.4,0.3,
-0.2,0.1,0.0,0.4]);
+let d = DataSet:: new(vec![0.1,0.2,0.3,0.4]);
+let d1= d.clone();
+let d2 = d.clone();
+println!("d+d = {}",(d1+d2)?);
 let _ = d.info();
 println!("Hello World {:#?}",Probability::factorial(100));
 Ok(())
