@@ -9,8 +9,8 @@
 //! * **Random Vector Framework:** Bivariate discrete spaces executing cross-joint tracking, marginal breakdowns, and conditional expectation parameters.
 //! * **Discrete Distributions:** Built-in calculation matrices for Binomial, Geometric, Pascal, and Hypergeometric models.
 
-
-
+use crate::statistics::DataSet;
+use crate::set;
 ///Result Type for the library
 pub type CDHResult<T> = Result<T,String>;
 
@@ -26,14 +26,14 @@ pub struct Probability;
 /// * `probability`: Matching distribution array tracking distinct weights or probability mass parameters ($P(X)$).
 #[derive(Debug,Clone)]
 pub struct RandomVariable{
-pub variable:Vec<f64>,
-pub probability: Vec<f64>
+pub variable:DataSet<f64>,
+pub probability: DataSet<f64>
 }
 
 /// A multivariate structure tracking pairs or collections of intersecting random processes over a discrete matrix space.
 #[derive(Debug)]
-pub struct RandomVector<T>{
-pub variables: Vec<RandomVariable>,
+pub struct RandomVector<const N:usize,T>{
+pub variables: [RandomVariable;N],
 pub probability_matrix:JointProbability<T>}
 
 /// A collection type wrapper containing a two-dimensional grid layout of raw statistical densities.
@@ -53,7 +53,8 @@ println!("+++++ probability.rs results +++++");
 let x = (0..10).map(|i| i as f64).collect::<Vec<f64>>();
 let px = x.iter().map(|_| 1f64/10f64)
 .collect::<Vec<f64>>();
-let rv = RandomVariable::new(x,px);
+let rv = RandomVariable::new(DataSet{data:x},
+DataSet{data:px});
 println!("Random Variable Mean === {:?}"
 ,rv.mean()?);
 println!("Random Variable Variance === {:?}"
@@ -69,7 +70,7 @@ let jp: Vec<Vec<f64>> = (0..10).
 map(|_|{
 (0..10).map(|_| 1f64/200f64).collect()
 }).collect();
-let rvv = RandomVector:: new(vec![rv.clone(),
+let rvv = RandomVector:: new([rv.clone(),
 rv.clone()],JointProbability::new(jp))?;
 println!("Random Vector Covariance === {:?}"
 ,rvv.covariance()?);
@@ -110,7 +111,7 @@ acc2+a
 
 impl RandomVariable{
    /// Instantiates a new entry tracking outcomes and matching process weights.
-pub fn new(x:Vec<f64>,px:Vec<f64>)->Self{
+pub fn new(x:DataSet<f64>,px:DataSet<f64>)->Self{
 Self{variable:x,probability:px}
 }
 
@@ -224,16 +225,16 @@ self.expectation_from_func(&|a|{
 
 
 
-impl RandomVector<f64>{
+impl RandomVector<2,f64>{
 /// Instantiates a new multivariate distribution vector matrix frame context.
     ///
     /// # Errors
     /// Returns an `Err` if the initial input array length drops below 2 or tracking configurations mismatch inside the vectors.
-pub fn new(x:Vec<RandomVariable>,
+pub fn new(x:[RandomVariable;2],
 px:JointProbability<f64>)->CDHResult<Self>{
 
 match x{
-a if a.len()<2 => Err("Vec.len() should be >= 2 in RandomCector::new".to_string()),
+a if a.len()<2 => Err("Vec.len() should be >= 2 in RandomVector::new".to_string()),
 a => {
 let len = a[0].variable.len();
 for i in &a[1..]{
@@ -306,7 +307,7 @@ pub fn conditional_expectation_x1<H>(&self,
         let mut expected_value = 0.0;
 
         // Sum over all possible values of X1
-        for index_x1 in 0..x1_outcomes.len() {
+        for index_x1 in 0..x1_outcomes.len()? {
             let p_cond = self.conditional_x1(
 index_x1, index_x2)?;
             if p_cond > 0.0 {
@@ -331,7 +332,7 @@ index_x1: usize, h: H) -> CDHResult<f64>
         let mut expected_value = 0.0;
 
         // Sum over all possible values of X2
-        for index_x2 in 0..x2_outcomes.len() {
+        for index_x2 in 0..x2_outcomes.len()? {
             let p_cond = self.conditional_x2(
 index_x1, index_x2)?;
             if p_cond > 0.0 {
@@ -357,8 +358,8 @@ matrix;
 
         let mut expected_value = 0.0;
 
-        for i in 0..x.variable.len() {
-            for j in 0..y.variable.len() {
+        for i in 0..x.variable.len()? {
+            for j in 0..y.variable.len()? {
                 let p_joint = joint_matrix[i][j];
                 
                 if p_joint > 0.0 {
@@ -473,19 +474,20 @@ Ok(Self::n_p_r(n,r)?/Self::factorial(r)?)
 
  /// Transforms raw baseline sequences mapping distribution sets across processing closures.
 pub fn random_variable<F>(set: &[f64],
-mut f:F)-> CDHResult<Vec<f64>>
+mut f:F)-> CDHResult<DataSet<f64>>
 where 
 F: FnMut(f64)->f64,
 //T: Copy
 {Ok(
+DataSet{data:
 set.into_iter().map(|elements|{
 f(*elements)
-}).collect::<Vec<f64>>())
+}).collect::<Vec<f64>>()})
 }
 
 /// Converts probability vectors into their matching localized Cumulative Distribution Function (CDF) increments.
 pub fn distribution_function(
-probability_set:&[f64])->CDHResult<Vec<f64>>{
+probability_set:&[f64])->CDHResult<DataSet<f64>>{
 let mut distri: Vec<f64>= Vec::with_capacity(
 probability_set.len());
 let mut sum = 0f64;
@@ -493,8 +495,7 @@ for &prob in probability_set{
 sum+= prob;
 distri.push(sum);
 }
-Ok(
-distri)
+Ok(DataSet{data:distri})
 }
 
 }
@@ -505,14 +506,14 @@ pub struct Binomial {
     /// Number of independent trials ($n$).
     pub n: usize,
     /// Vector tracking target successes ($x$).
-    pub x: Vec<usize>,
+    pub x: DataSet<usize>,
     /// Probability of success on an individual trial ($p$).
     pub p: f64,
 }
 
 
 impl Binomial{
-pub fn new(n:usize,x:Vec<usize>,p:f64)->Self{
+pub fn new(n:usize,x:DataSet<usize>,p:f64)->Self{
 Self{
 n,x,p
 }
@@ -520,13 +521,13 @@ n,x,p
 
 /// Computes the complete array parameters mapped via the distribution PMF formula.
 pub fn get_probability_set(&self)
-->CDHResult<Vec<f64>>{
-Ok(self.x.iter().map(|&i|{
+->CDHResult<DataSet<f64>>{
+Ok(DataSet{data:self.x.iter().map(|&i|{
 let ncr = Probability::n_c_r(self.n,i).unwrap();
 let ppx = self.p.powf(i as f64);
 let qpnx = (1f64-self.p).powf((self.n-i) as f64);
 ncr*ppx*qpnx
-}).collect::<Vec<f64>>()
+}).collect::<Vec<f64>>()}
 )}
 
 
@@ -542,25 +543,25 @@ Ok(self.mean()?*(1f64-self.p))
 /// Tracks observations processing structural patterns for Discrete Geometric configurations.
 pub struct Geometric {
     /// Number of trials until the first success occurs ($x$).
-    pub x: Vec<usize>,
+    pub x: DataSet<usize>,
     /// Probability of success on a single trial ($p$).
     pub p: f64,
 }
 
 
 impl Geometric{
-pub fn new(x:Vec<usize>, p:f64)->Self{
+pub fn new(x:DataSet<usize>, p:f64)->Self{
 Self{
 x,p}
 }
 
 /// Maps the structural parameters through the Geometric execution distribution tracking matrix.
 pub fn get_probability_set(&self)
-->CDHResult<Vec<f64>>{
-Ok(self.x.iter().map(|&i|{
+->CDHResult<DataSet<f64>>{
+Ok(DataSet{data:self.x.iter().map(|&i|{
 let qpnx = (1f64-self.p).powf(i as f64 -1f64);
 self.p*qpnx
-}).collect::<Vec<f64>>()
+}).collect::<Vec<f64>>()}
 )}
 pub fn mean(&self)->CDHResult<f64>{
 Ok(1f64/ self.p)
@@ -575,26 +576,26 @@ pub struct Pascal {
     /// Target number of total successes required ($r$).
     pub r: usize,
     /// Vector tracking total numbers of executed trials ($x$).
-    pub x: Vec<usize>,
+    pub x: DataSet<usize>,
     /// Probability of success on an isolated trial ($p$).
     pub p: f64,
 }
 
 
 impl Pascal{
-pub fn new(r:usize,x:Vec<usize>,p:f64)->Self{
+pub fn new(r:usize,x:DataSet<usize>,p:f64)->Self{
 Self{r,x,p}
 }
 
 /// Computes the structural parameters mapping points via the Negative Binomial equation engine.
 pub fn get_probability_set(&self)
-->CDHResult<Vec<f64>>{
-Ok(self.x.iter().map(|&i|{
+->CDHResult<DataSet<f64>>{
+Ok(DataSet{data:self.x.iter().map(|&i|{
 let ncr = Probability::n_c_r(i-1,self.r-1).unwrap();
 let ppx = self.p.powf(i as f64);
 let qpnx = (1f64-self.p).powf((i-self.r) as f64);
 ncr*ppx*qpnx
-}).collect::<Vec<f64>>()
+}).collect::<Vec<f64>>()}
 )}
 
 pub fn mean(&self)->CDHResult<f64>{

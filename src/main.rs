@@ -1,7 +1,9 @@
 use scicdh::statistics::*;
 use scicdh::probability::*;
+use scicdh:: set;
+use scicdh::traits::*;
 fn main()->CDHResult<()>{
-let d = DataSet:: new(vec![0.1,0.2,0.3,0.4]);
+let d =  set![0.1,0.2,0.3,0.4];
 let d1= d.clone();
 let d2 = d.clone();
 println!("d+d = {}",(d1+d2)?);
@@ -17,11 +19,11 @@ Ok(())
 
 #[cfg(test)]
 mod tests{
-use crate::statistics::*;
-use crate:: probability::*;
+use scicdh::statistics::*;
+use scicdh:: probability::*;
 #[test]
 fn mean_test(){
-let a = DataSet(vec![1.0,2.0,3.0,4.0]);
+let a = DataSet{data:vec![1.0,2.0,3.0,4.0]};
 let p= Probability::get_probability(8.0,3.0);
 let npr= Probability::n_p_r(4,2);
 let f5= Probability::factorial(5);
