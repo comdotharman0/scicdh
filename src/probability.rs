@@ -32,8 +32,8 @@ pub probability: DataSet<f64>
 
 /// A multivariate structure tracking pairs or collections of intersecting random processes over a discrete matrix space.
 #[derive(Debug)]
-pub struct RandomVector<const N:usize,T>{
-pub variables: [RandomVariable;N],
+pub struct RandomVector<T>{
+pub variables: Vec<RandomVariable>,
 pub probability_matrix:JointProbability<T>}
 
 /// A collection type wrapper containing a two-dimensional grid layout of raw statistical densities.
@@ -70,7 +70,7 @@ let jp: Vec<Vec<f64>> = (0..10).
 map(|_|{
 (0..10).map(|_| 1f64/200f64).collect()
 }).collect();
-let rvv = RandomVector:: new([rv.clone(),
+let rvv = RandomVector:: new(vec![rv.clone(),
 rv.clone()],JointProbability::new(jp))?;
 println!("Random Vector Covariance === {:?}"
 ,rvv.covariance()?);
@@ -122,7 +122,8 @@ Self{variable:x,probability:px}
     /// # Example
     /// ```rust
     /// # use scicdh::probability::RandomVariable;
-    /// let rv = RandomVariable::new(vec![1.0, 2.0], vec![0.5, 0.5]);
+   ///  # use scicdh::{set,statistics::DataSet};
+    /// let rv = RandomVariable::new(set![1.0, 2.0], set![0.5, 0.5]);
     /// assert_eq!(rv.mean().unwrap(), 1.5);
     /// ```
 pub fn mean(&self)->CDHResult<f64>{
@@ -225,12 +226,12 @@ self.expectation_from_func(&|a|{
 
 
 
-impl RandomVector<2,f64>{
+impl RandomVector<f64>{
 /// Instantiates a new multivariate distribution vector matrix frame context.
     ///
     /// # Errors
     /// Returns an `Err` if the initial input array length drops below 2 or tracking configurations mismatch inside the vectors.
-pub fn new(x:[RandomVariable;2],
+pub fn new(x:Vec<RandomVariable>,
 px:JointProbability<f64>)->CDHResult<Self>{
 
 match x{

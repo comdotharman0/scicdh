@@ -274,6 +274,12 @@ where T : Numeric+std::cmp::PartialEq
         DataSet{data}
     }
 
+pub fn to_f64(&self)->CDHResult<DataSet<f64>>{
+let data= self.iter().map(|&i| i.to_f64())
+.collect();
+Ok(DataSet::new(data))
+}
+
 /// Deduplicates entries from the dataset to form a unique element mathematical set pool.
     pub fn into_set(&self) -> CDHResult<Vec<T>> {
         let mut set: Vec<T> = Vec::with_capacity(self.data.len());

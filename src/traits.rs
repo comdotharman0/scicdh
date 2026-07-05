@@ -36,6 +36,8 @@ pub trait Numeric:
     fn powf(self, exp: Self) -> Self;
     fn to_bits_u64(self) -> u64;
     fn from_bits_u64(bits: u64) -> Self;
+/// Safely projects the generic numeric value into a high-accuracy f64 float.
+    fn to_f64(self) -> f64;
 }
 
 // =========================================================================
@@ -52,6 +54,8 @@ impl Numeric for f64 {
     #[inline] fn powf(self, exp: Self) -> Self { self.powf(exp) }
     #[inline] fn to_bits_u64(self) -> u64 { self.to_bits() }
     #[inline] fn from_bits_u64(bits: u64) -> Self { f64::from_bits(bits) }
+ #[inline] fn to_f64(self) -> f64 { self } // Already an f64!
+
 }
 
 impl Numeric for f32 {
@@ -64,6 +68,8 @@ impl Numeric for f32 {
     #[inline] fn powf(self, exp: Self) -> Self { self.powf(exp) }
     #[inline] fn to_bits_u64(self) -> u64 { self.to_bits() as u64 }
     #[inline] fn from_bits_u64(bits: u64) -> Self { f32::from_bits(bits as u32) }
+ #[inline] fn to_f64(self) -> f64 { self  as f64} 
+
 }
 
 // =========================================================================
@@ -80,7 +86,9 @@ impl Numeric for usize {
     #[inline] fn powf(self, exp: Self) -> Self { (self as f64).powf(exp as f64) as usize }
     #[inline] fn to_bits_u64(self) -> u64 { self as u64 }
     #[inline] fn from_bits_u64(bits: u64) -> Self { bits as usize }
+#[inline] fn to_f64(self) -> f64 { self  as f64}
 }
+
 
 impl Numeric for isize {
     #[inline] fn zero() -> Self { 0 }
@@ -92,4 +100,6 @@ impl Numeric for isize {
     #[inline] fn powf(self, exp: Self) -> Self { (self as f64).powf(exp as f64) as isize }
     #[inline] fn to_bits_u64(self) -> u64 { self as u64 }
     #[inline] fn from_bits_u64(bits: u64) -> Self { bits as isize }
+#[inline] fn to_f64(self) -> f64 { self  as f64}
+
 }
