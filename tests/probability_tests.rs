@@ -1,4 +1,6 @@
 use scicdh::probability::*;
+use scicdh::statistics::*;
+use scicdh:: set;
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -8,8 +10,8 @@ mod tests {
     }
 
     fn uniform_rv() -> RandomVariable {
-        let x = vec![0.0, 1.0, 2.0, 3.0, 4.0];
-        let px = vec![0.2, 0.2, 0.2, 0.2, 0.2];
+        let x = set![0.0, 1.0, 2.0, 3.0, 4.0];
+        let px = set![0.2, 0.2, 0.2, 0.2, 0.2];
         RandomVariable::new(x, px)
     }
 
@@ -150,20 +152,20 @@ mod tests {
 
     #[test]
     fn test_binomial_mean() {
-        let b = Binomial::new(10, vec![0], 0.5);
+        let b = Binomial::new(10, set![0], 0.5);
         assert!(approx_eq(b.mean().unwrap(), 5.0));
     }
 
     #[test]
     fn test_binomial_variance() {
-        let b = Binomial::new(10, vec![0], 0.5);
+        let b = Binomial::new(10, set![0], 0.5);
         assert!(approx_eq(b.variance().unwrap(), 2.5));
     }
 
     #[test]
     fn test_binomial_pmf_at_zero() {
         // P(X=0) = (0.5)^10 = 1/1024
-        let b = Binomial::new(10, vec![0], 0.5);
+        let b = Binomial::new(10, set![0], 0.5);
         let probs = b.get_probability_set().unwrap();
         assert!(approx_eq(probs[0], 1.0 / 1024.0));
     }
@@ -172,7 +174,7 @@ mod tests {
     fn test_binomial_pmf_sums_to_one() {
         // Full distribution B(4, 0.5): x=0,1,2,3,4
         // Must sum to 1.0 — law of total probability
-        let b = Binomial::new(4, vec![0, 1, 2, 3, 4], 0.5);
+        let b = Binomial::new(4, set![0, 1, 2, 3, 4], 0.5);
         let sum: f64 = b.get_probability_set()
             .unwrap()
             .iter()
@@ -188,20 +190,20 @@ mod tests {
 
     #[test]
     fn test_geometric_mean() {
-        let g = Geometric::new(vec![1], 0.5);
+        let g = Geometric::new(set![1], 0.5);
         assert!(approx_eq(g.mean().unwrap(), 2.0));
     }
 
     #[test]
     fn test_geometric_variance() {
-        let g = Geometric::new(vec![1], 0.5);
+        let g = Geometric::new(set![1], 0.5);
         assert!(approx_eq(g.variance().unwrap(), 2.0));
     }
 
     #[test]
     fn test_geometric_pmf_at_one() {
         // P(X=1) = p*(1-p)^0 = 0.5
-        let g = Geometric::new(vec![1], 0.5);
+        let g = Geometric::new(set![1], 0.5);
         let probs = g.get_probability_set().unwrap();
         assert!(approx_eq(probs[0], 0.5));
     }
@@ -214,13 +216,13 @@ mod tests {
 
     #[test]
     fn test_pascal_mean() {
-        let p = Pascal::new(2, vec![2, 3], 0.5);
+        let p = Pascal::new(2, set![2, 3], 0.5);
         assert!(approx_eq(p.mean().unwrap(), 4.0));
     }
 
     #[test]
     fn test_pascal_variance() {
-        let p = Pascal::new(2, vec![2, 3], 0.5);
+        let p = Pascal::new(2, set![2, 3], 0.5);
         assert!(approx_eq(p.variance().unwrap(), 8.0));
     }
 
@@ -228,7 +230,7 @@ mod tests {
     fn test_pascal_pmf_at_r() {
         // P(X=r) = C(r-1,r-1)*p^r*(1-p)^0 = p^r
         // For r=2, p=0.5: P(X=2) = 0.5^2 = 0.25
-        let p = Pascal::new(2, vec![2], 0.5);
+        let p = Pascal::new(2, set![2], 0.5);
         let probs = p.get_probability_set().unwrap();
         assert!(approx_eq(probs[0], 0.25));
     }
@@ -277,12 +279,12 @@ mod tests {
         // Tests the bug fix: !i.variable.len()==len was always false
         // After fixing to i.variable.len() != len, this must return Err
         let rv1 = RandomVariable::new(
-            vec![0.0, 1.0],
-            vec![0.5, 0.5]
+            set![0.0, 1.0],
+            set![0.5, 0.5]
         );
         let rv2 = RandomVariable::new(
-            vec![0.0, 1.0, 2.0],
-            vec![0.33, 0.33, 0.34]
+            set![0.0, 1.0, 2.0],
+            set![0.33, 0.33, 0.34]
         );
         let jp = JointProbability::new(vec![vec![1.0]]);
         assert!(RandomVector::new(vec![rv1, rv2], jp).is_err());
