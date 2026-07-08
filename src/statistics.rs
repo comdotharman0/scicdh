@@ -1,5 +1,5 @@
 use crate::probability::CDHResult;
-use crate::traits::{Numeric,Info};
+use crate::traits::{Numeric,Info,Transform};
 use std::collections::HashMap;
 use std::ops::{Add,Sub, Mul, Div, Index, IndexMut,
 AddAssign, SubAssign, MulAssign, DivAssign};
@@ -257,6 +257,21 @@ self.max()?,self.min()?)
 
 
     }
+
+}
+
+impl<T> Transform<T> for DataSet<T>
+where T : Numeric+std::cmp::PartialEq{
+
+
+fn transform<H>(&self, h: &H) -> CDHResult<Self>
+    where
+        H: Fn(&T)->T,
+        Self: Sized{
+let data: Vec<T> = self.iter().map(|x| h(x))
+.collect();
+Ok(DataSet::new(data))
+}
 
 }
 

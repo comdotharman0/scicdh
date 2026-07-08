@@ -7,9 +7,9 @@ use crate::probability::CDHResult;
 
 pub trait Transform<T> {
     /// Maps a transformation closure element-wise over the container.
-    fn transform_to_collect<H>(&self, h: &H) -> CDHResult<Self>
+    fn transform<H>(&self, h: &H) -> CDHResult<Self>
     where
-        H: Fn(T) -> T,
+        H: Fn(&T)->T,
         Self: Sized;
 }
 

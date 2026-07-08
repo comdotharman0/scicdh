@@ -2,13 +2,9 @@ use scicdh::statistics::*;
 use scicdh::probability::*;
 use scicdh:: set;
 use scicdh::traits::*;
+use scicdh:: integrals::*;
 fn main()->CDHResult<()>{
-let d =  set![0.1,0.2,0.3,0.4];
-let d1= d.clone();
-let d2 = d.clone();
-println!("d+d = {}",(d1+d2)?);
-let _ = d.info();
-println!("Hello World {:#?}",Probability::factorial(100));
+integrals_checking()?;
 Ok(())
 }
 
