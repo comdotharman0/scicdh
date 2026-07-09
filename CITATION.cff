@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata parameters."
+title: "scicdh: A pure Rust library for descriptive statistics and discrete probability theory"
+abstract: "A high-performance, zero-dependency Rust library implementing descriptive statistics and discrete probability distributions from foundational engineering and measure-theoretic specifications."
+authors:
+  - family-names: "Singh"
+    given-names: "Harman"
+version: "0.2.2"
+date-released: "2026-07-09"
+repository-code: "https://github.com/comdotharman0/scicdh"
+keywords:
+  - "rust"
+  - "statistics"
+  - "probability-theory"
+  - "discrete-distributions"
+  - "data-science"
+  - "open-science"
+license: "MIT"
+references:
+  - type: book
+    title: "Probability and Statistics in Engineering"
+    authors:
+      - family-names: "Hines"
+        given-names: "William W."
+      - family-names: "Montgomery"
+        given-names: "Douglas C."
+      - family-names: "Goldsman"
+        given-names: "David M."
+      - family-names: "Borror"
+        given-names: "Connie M."
+    edition: "4th"
+    year: 2003
+    publisher:
+      name: "John Wiley & Sons"
+  - type: book
+    title: "Measure, Integration & Real Analysis"
+    authors:
+      - family-names: "Axler"
+        given-names: "Sheldon"
+    collection-title: "Graduate Texts in Mathematics"
+    volume: 280
+    year: 2020
+    publisher:
+      name: "Springer"
+

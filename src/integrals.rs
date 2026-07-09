@@ -1,6 +1,7 @@
 use crate::statistics::DataSet;
 use crate::probability:: CDHResult;
 use crate::traits::{Numeric,Transform};
+#[derive(Debug)]
 pub struct Partition<const N:usize,T>
 where
 T: Numeric{
@@ -8,6 +9,7 @@ interval:[T;N],
 n: usize
 }
 
+#[derive(Debug)]
 pub struct Function<const N: usize,T,F>
 where 
 F: Fn(f64)->f64,
@@ -18,10 +20,12 @@ partition:Partition<N,T>
 
 pub fn integrals_checking()
 -> CDHResult<()>{
-let d = DataSet::new(
-vec![0f64,1f64,2f64]);
-println!("d={:?}",d);
-println!("d²= {:?}",d.transform(&|i| i*i));
+let p = Partition::new([1f64,11f64],10)?;
+let f = Function::new(|a| a*a,p)?;
+//println!("f={:#?}",f.partition.create()?);
+//println!("d²= {:?}",d.transform(&|i| i*i));
+println!("infimum={:?}, supremum={:?}",f.infimum()?,
+f.supremum()?);
 Ok(())
 
 }
@@ -40,7 +44,7 @@ Ok(Self{interval,n})
 
 pub fn create(&self)->CDHResult<DataSet<f64>>{
 let a= self.interval[0].to_f64();
-let b= self.interval[0].to_f64();
+let b= self.interval[1].to_f64();
 let diff = b-a;
 let steps = diff/(self.n as f64);
 let mut ds = DataSet::new(vec![a]);
@@ -67,7 +71,15 @@ Ok(Self{func,partition})
 }
 
 pub fn infimum(&self)->CDHResult<f64>{
-Ok(0f64)
+self.partition.create()?
+.to_f64()?.transform(&self.func)?
+.min()
+}
+
+pub fn supremum(&self)->CDHResult<f64>{
+self.partition.create()?
+.to_f64()?.transform(&self.func)?
+.max()
 }
 
 

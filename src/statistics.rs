@@ -266,9 +266,9 @@ where T : Numeric+std::cmp::PartialEq{
 
 fn transform<H>(&self, h: &H) -> CDHResult<Self>
     where
-        H: Fn(&T)->T,
+        H: Fn(T)->T,
         Self: Sized{
-let data: Vec<T> = self.iter().map(|x| h(x))
+let data: Vec<T> = self.iter().map(|&x| h(x))
 .collect();
 Ok(DataSet::new(data))
 }
