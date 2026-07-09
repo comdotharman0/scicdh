@@ -4,6 +4,8 @@ A pure Rust library for descriptive statistics and
 discrete probability theory. Built with **zero external 
 dependencies** using only Rust's standard library.
 
+[![DOI](https://zenodo.org/badge/1280434144.svg)](https://doi.org/10.5281/zenodo.21279300)
+
 ## Author
 Harman Singh  
 ORCID: [0009-0004-5218-9471](https://orcid.org/0009-0004-5218-9471)
