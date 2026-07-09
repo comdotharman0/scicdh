@@ -5,7 +5,7 @@ abstract: "A high-performance, zero-dependency Rust library implementing descrip
 authors:
   - family-names: "Singh"
     given-names: "Harman"
-    orcid:"https://orcid.org/0009-0004-5218-9471"
+    orcid: "https://orcid.org/0009-0004-5218-9471"
 version: "0.2.3"
 date-released: "2026-07-09"
 repository-code: "https://github.com/comdotharman0/scicdh"
