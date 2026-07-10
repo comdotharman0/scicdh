@@ -1,6 +1,6 @@
 [package]
 name = "scicdh"
-version = "0.2.5"
+version = "0.2.6"
 edition = "2024"
 description = "A zero-dependency scientific library for probability space modeling and multi-variable statistical analysis."
 license = "MIT"
